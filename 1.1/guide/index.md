@@ -157,6 +157,10 @@ Slide构造器第二个参数用以传入配置项，这些配置项为基础参
 
 鼠标悬停在面板上是否停止自动播放，默认为true
 
+*invisibleStop:{Boolean} 
+
+slide面板脱离可视区是否停止自动播放，默认为false。支持由tab页失去焦点，resize，scroll事件导致的slide脱离视野
+
 *selectedClass* (String)
 
 导航选中时的className，默认为'selected'
