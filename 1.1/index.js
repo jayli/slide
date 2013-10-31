@@ -16,7 +16,7 @@ KISSY.add('gallery/slide/1.1/index',function(S,BSlide){
  * 		Demo:	配host，访问：http://a.tbcdn.cn/apps/ks/zoo/slide/demo/tab.html
  *
  * @param 参数列表
- * 		autoSlide : {boolean} 	是否自动播放，默认为false
+ * 		autoSlide : {Boolean} 	是否自动播放，默认为false
  * 		speed:		{float}		帧切换的速度，默认为500(ms)
  * 		timeout:	{Number}	帧切换的时间间隔，默认为1000(ms)
  * 		effect:		{String}	帧切换类型，默认为'none',取值： * 								none:无特效
@@ -29,8 +29,8 @@ KISSY.add('gallery/slide/1.1/index',function(S,BSlide){
  * 								mouseenter:鼠标进入
  * 		easing:		{String}	帧切换的缓动值，默认为'easeBoth'，取值请参照KISSY.Anim
  * 							http://docs.kissyui.com/docs/html/api/core/anim/index.html
- * 		hoverStop:	{boolean}	鼠标悬停在面板上是否停止自动播放，默认为true
- *      invisibleStop:{boolean} slide面板脱离可视区是否停止自动播放，默认为false。支持由tab页失去焦点，resize，scroll事件导致的slide脱离视野
+ * 		hoverStop:	{Boolean}	鼠标悬停在面板上是否停止自动播放，默认为true
+ *      invisibleStop:{Boolean} slide面板脱离可视区是否停止自动播放，默认为false。支持由tab页失去焦点，resize，scroll事件导致的slide脱离视野
  * 		selectedClass:{String}	tab选中时的className，默认为't-slide'，目前未实现
  * 		navClass:	{String}	tab容器的className，默认为'tab-nav'
  * 		triggerSelector:{String}tab容器中的触碰元素的选择器，默认为'li'
@@ -39,13 +39,13 @@ KISSY.add('gallery/slide/1.1/index',function(S,BSlide){
  * 		id:			{String}	hook，直接写id，比如"J_id"(正确)，"#J_id"(错误)
  * 		carousel:	{Boolean}	是否以跑马灯形式播放，默认为false
  * 		touchmove:	{Boolean}	是否支持手指滑动切换，默认为false
- * 		adaptive_fixed_width:{boolean} 屏幕是否根据控件的宽度改变重新渲染尺寸，默认为false，主要在组件定宽高的场景中，保证resize时tab-pannel尺寸正确
- * 		adaptive_fixed_height:{boolean} 屏幕是否根据控件的高度改变重新渲染尺寸，默认为false,主要在组件定宽高的场景中，保证resize时tab-pannel尺寸正确
- * 		adaptive_fixed_size:{boolean} 屏幕是否根据控件的宽度和高度改变重新渲染尺寸，默认为false,主要在组件定宽高的场景中，保证resize时tab-pannel尺寸正确
+ * 		adaptive_fixed_width:{Boolean} 屏幕是否根据控件的宽度改变重新渲染尺寸，默认为false，主要在组件定宽高的场景中，保证resize时tab-pannel尺寸正确
+ * 		adaptive_fixed_height:{Boolean} 屏幕是否根据控件的高度改变重新渲染尺寸，默认为false,主要在组件定宽高的场景中，保证resize时tab-pannel尺寸正确
+ * 		adaptive_fixed_size:{Boolean} 屏幕是否根据控件的宽度和高度改变重新渲染尺寸，默认为false,主要在组件定宽高的场景中，保证resize时tab-pannel尺寸正确
  * 		defaultTab:	{Number}	默认定位在某个帧，默认为0，即第一帧
  * 		layerSlide:	{Boolean}	是否开启分层动画，默认为false
  * 		layerClass:	{String}	subLayer的className，未实现，默认用alt="sublayer"来标识
- * 		reverse:	{boolean} 	"播放下一个"和"播放上一个"对调，默认为false
+ * 		reverse:	{Boolean} 	"播放下一个"和"播放上一个"对调，默认为false
  * 		adaptive_height:{function},同下
  * 		adaptive_width:{function}，如果是百分比设置容器的宽度的话，需要指定这个函数，返回一个宽度值，动态的得到可变化的宽度,默认为false，代码示例:
  *
