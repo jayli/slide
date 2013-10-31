@@ -538,7 +538,7 @@ KISSY.add('gallery/slide/1.1/base',function(S){
 										self.animcon.get('region').width;
 				height = self.pannels.item(index).get('region').height;
 				
-
+				// 修复resize时animwrap尺寸计算有误
 				self.animwrap.setStyles({
 					width:self.pannels.size() * width + 'px'
 				});
@@ -571,7 +571,8 @@ KISSY.add('gallery/slide/1.1/base',function(S){
 				height = self.adaptive_height ? 
 										self.adaptive_height():
 										self.animcon.get('region').height;
-
+				
+				// 修复resize时animwrap尺寸计算有误
 				self.animwrap.setStyles({
 					height:self.pannels.size() * height + 'px'
 				});
@@ -718,7 +719,7 @@ KISSY.add('gallery/slide/1.1/base',function(S){
 			if(self.hoverStop){
 				self.con._delegate('mouseover',function(e){
 					//e.halt();
-					self.isMouseover = true;
+					self.isMouseover = true;		// 增加对鼠标状态的标识
 					if(self.autoSlide)self.stop();
 				},'.'+self.contentClass+' .'+self.pannelClass);
 				self.con._delegate('mouseout',function(e){
