@@ -30,7 +30,7 @@ KISSY.add('gallery/slide/1.1/index',function(S,BSlide){
  * 		easing:		{String}	帧切换的缓动值，默认为'easeBoth'，取值请参照KISSY.Anim
  * 							http://docs.kissyui.com/docs/html/api/core/anim/index.html
  * 		hoverStop:	{boolean}	鼠标悬停在面板上是否停止自动播放，默认为true
- *      invisibleStop:{boolean} slide面板脱离可视区是否停止自动播放，默认为false
+ *      invisibleStop:{boolean} slide面板脱离可视区是否停止自动播放，默认为false。支持由tab页失去焦点，resize，scroll事件导致的slide脱离视野
  * 		selectedClass:{String}	tab选中时的className，默认为't-slide'，目前未实现
  * 		navClass:	{String}	tab容器的className，默认为'tab-nav'
  * 		triggerSelector:{String}tab容器中的触碰元素的选择器，默认为'li'
