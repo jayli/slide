@@ -38,7 +38,6 @@ KISSY.add('gallery/slide/1.1/base',function(S){
 
 		// 构造函数
 		init:function(selector,config){
-
 			var self = this;
 
 			if(S.isObject(selector)){
@@ -280,7 +279,6 @@ KISSY.add('gallery/slide/1.1/base',function(S){
 		// 如果是动画效果，则构建Wrap
 		buildWrap: function(){
 			var self = this;
-
 			self.animwrap = S.Node.create('<div style="position:absolute;"></div>');
 			self.animwrap.set('innerHTML', self.animcon.get('innerHTML'));
 			self.animcon.set('innerHTML', '');
@@ -363,7 +361,6 @@ KISSY.add('gallery/slide/1.1/base',function(S){
 					});
 				}
 			};
-
 			effectInitFn[self.effect]();
 
 			return this;
@@ -405,7 +402,12 @@ KISSY.add('gallery/slide/1.1/base',function(S){
 			self.hightlightNav(self.getWrappedIndex(self.currentTab));
             //是否自动播放
             if (self.autoSlide === true) {
-                self.play();
+				// 如果设置了invisibleStop为true，还要多判断一下slide是否在可视区
+				// 未设置invisibleStop为true，则直接自动播放
+				if((self.invisibleStop && self.isSlideVisible())||
+					!self.invisibleStop){
+					self.play();
+				}
             }
             return this;
         },
@@ -537,15 +539,21 @@ KISSY.add('gallery/slide/1.1/base',function(S){
 										self.adaptive_width():
 										self.animcon.get('region').width;
 				height = self.pannels.item(index).get('region').height;
+				
+				// 修复resize时animwrap尺寸计算有误
+				self.animwrap.setStyles({
+					width:self.pannels.size() * width + 'px'
+				});
 
 				width /= self.colspan;
-
+				
 				// pannels的高度是不定的，高度是根据内容
 				// 来撑开的因此不能设置高度，而宽度则需要设置
 				self.pannels.setStyles({
 					width:width+'px',
 					display:'block'
 				});
+				
 
 				self.animcon.setStyles({
 					width:width * self.colspan +'px',
@@ -565,6 +573,12 @@ KISSY.add('gallery/slide/1.1/base',function(S){
 				height = self.adaptive_height ? 
 										self.adaptive_height():
 										self.animcon.get('region').height;
+				
+				// 修复resize时animwrap尺寸计算有误
+				self.animwrap.setStyles({
+					height:self.pannels.size() * height + 'px'
+				});
+
 				height /= self.colspan;
 
 				self.pannels.setStyles({
@@ -707,17 +721,19 @@ KISSY.add('gallery/slide/1.1/base',function(S){
 			if(self.hoverStop){
 				self.con._delegate('mouseover',function(e){
 					//e.halt();
+					self.isMouseover = true;		// 增加对鼠标状态的标识
 					if(self.autoSlide)self.stop();
 				},'.'+self.contentClass+' .'+self.pannelClass);
 				self.con._delegate('mouseout',function(e){
 					//e.halt();
+					self.isMouseover = false;
 					if(self.autoSlide)self.play();
 				},'.'+self.contentClass+' .'+self.pannelClass);
 			}
 
 			// 绑定窗口resize事件 
 			try {
-				S.Event.on('resize',function(e){
+				S.Event.on(window,'resize',function(e){
 					self.fixSlideSize(self.currentTab);
 					self.relocateCurrentTab();
 				},window);
@@ -907,11 +923,75 @@ KISSY.add('gallery/slide/1.1/base',function(S){
 				}
 
 			}
+			
+			// slide离开视野，是否暂停滚动
+			if(self.invisibleStop){
+				// 检测是否支持pagevisivility，脱离视野，暂停播放
+				var visProp = S.getHiddenProp();
+				if(visProp){
+					// 拼装visibilitychange事件名，并监听
+					var evtname = visProp.replace(/[H|h]idden/,'') + 'visibilitychange',autoPlayPageVisible;
+					S.Event.on(document,evtname,function(e){
+						// 如果页面离开视野，暂停播放
+						if(S.isHidden()){
+							if(self.timer){
+								autoPlayPageVisible = true;
+								self.stop();
+								//console.info('触发事件:'+e.type+'   '+'播放状态：stop');
+							}else{
+								autoPlayPageVisible = false;
+							}
+						}else{
+							// 页面可见 && slide在视野内 && 停止播放前slide播放状态是‘正在播放’ 满足这三个条件继续播放
+							if(self.isSlideVisible()&&autoPlayPageVisible){
+								self.play();
+								//console.info('触发事件:'+e.type+'   '+'播放状态：play');
+							}
+						}
+					});
+				}
+				// 监听onscoll,resize事件，通过坐标判断slide是否脱离可视区
+				S.Event.on(window,'scroll resize',function(e){
+					// 边界判断
+					if(self.isSlideVisible()){
+						// 防止与鼠标悬停slide停止播放的设置相冲突，if里要检测鼠标是否在slide上
+						// bug场景：鼠标悬浮在slide上，滚动页面，触发play，与hoverStop设置冲突
+						if(!self.timer&&
+							(!self.hoverStop||(self.hoverStop&&!self.isMouseover))){
+							self.play();
+							//console.info('触发事件:'+e.type+'   '+'播放状态：play');
+						}
+					}else{
+						if(self.timer){
+							self.stop();
+							//console.info('触发事件:'+e.type+'   '+'播放状态：stop');
+						}
+					}
+					
+				});
+			}
 
 			return this;
-
 		},
-
+		// 判断slide是否在可视区内
+		isSlideVisible:function(){
+			var self = this,
+				slideLeft = self.animcon.offset().left,
+				slideTop = self.animcon.offset().top,
+				slideWidth = self.animcon.outerWidth(),
+				slideHeight = self.animcon.outerHeight(),
+				scrollTop = S.DOM.scrollTop(),
+				scrollLeft = S.DOM.scrollLeft();	
+			if(scrollTop>slideTop+slideHeight||
+				scrollTop+S.DOM.height(window)<slideTop||
+				scrollLeft>slideLeft+slideWidth||
+				scrollLeft+S.DOM.width(window)<slideLeft){
+				return false;
+			}else{
+				return true;
+			}
+		},
+		
 		// 初始化所有的SubLayer
 		// TODO 从BSlide中抽离出来
 
@@ -1282,6 +1362,7 @@ KISSY.add('gallery/slide/1.1/base',function(S){
 				eventType:		'click',
 				easing:			'easeBoth',
 				hoverStop:		true,
+				invisibleStop:	false,
 				selectedClass:	'selected',
 				conClass:		't-slide',
 				navClass:		'tab-nav',
@@ -1457,7 +1538,6 @@ KISSY.add('gallery/slide/1.1/base',function(S){
 		// 修正跑马灯结尾的滚动位置
 		fix_next_carousel:function(){
 			var self = this;
-
 			self.currentTab = self.colspan;
 			var con = self.con;
 			if(self.effect != 'none'){
@@ -1534,7 +1614,7 @@ KISSY.add('gallery/slide/1.1/base',function(S){
 		//切换至index,这里的index为真实的索引
 		switch_to:function(index,callback){
 			var self = this;
-
+			
 			// 切换是否强制取消动画
 			if(callback === false){
 				var doeffect = false;
@@ -1560,7 +1640,7 @@ KISSY.add('gallery/slide/1.1/base',function(S){
 				navnode: self.tabs.item(self.getWrappedIndex(self.currentTab)),
 				pannelnode: self.pannels.item(self.currentTab)
 			});
-
+			
 			self.fixSlideSize(index);
 			if(self.autoSlide){
 				self.stop().play();
@@ -1644,7 +1724,7 @@ KISSY.add('gallery/slide/1.1/base',function(S){
 
 				},
 				'hSlide':function(index){
-
+					
 					if(self.transitions){
 
 						self.animwrap.setStyles({
@@ -1652,6 +1732,7 @@ KISSY.add('gallery/slide/1.1/base',function(S){
 							'-webkit-transform':'translate3d('+(-1 * index * self.animcon.get('region').width / self.colspan)+'px,0,0)',
 							'-webkit-backface-visibility':'hidden'
 						});
+						
 						if(doeffect){
 							self.anim = S.Anim(self.animwrap,{
 								opacity:1
@@ -1731,12 +1812,10 @@ KISSY.add('gallery/slide/1.1/base',function(S){
 				if(goon !== false){
 					//发生go的时候首先判断是否需要整理空间的长宽尺寸
 					//self.renderSize(index);
-
 					if(index + self.colspan > self.pannels.size()){
 						index = self.pannels.size() - self.colspan;
 					}
 					animFn[self.effect](index);
-
 					self.currentTab = index;
 					self.hightlightNav(self.getWrappedIndex(index));
 					// TODO，讨论switch的发生时机
